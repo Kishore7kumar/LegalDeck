@@ -1,0 +1,19 @@
+backend
+├── config
+│   └── db.js
+├── controllers
+│   ├── userController.js
+│   ├── lawyerController.js
+│   └── appointmentController.js
+├── models
+│   ├── User.js
+│   ├── Lawyer.js
+│   └── Appointment.js
+├── routes
+│   ├── userRoutes.js
+│   ├── lawyerRoutes.js
+│   └── appointmentRoutes.js
+├── middleware
+│   └── authMiddleware.js
+├── .env
+├── server.js
