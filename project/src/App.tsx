@@ -12,6 +12,7 @@ import LawyerProfile from './pages/LawyerProfile';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import About from './pages/About';
+import Services from './pages/Services';
 import Contact from './pages/Contact';
 
 function App() {
@@ -30,6 +31,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/about" element={<About />} />
+            <Route path="/services" element={<Services />} />
             <Route path="/contact" element={<Contact />} />
           </Routes>
         </main>
