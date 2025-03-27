@@ -25,7 +25,7 @@ const lawyers: Lawyer[] = [
     rating: 4.8,
     reviews: 127,
     hourlyRate: 200,
-    image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80",
+    image: "https://media.istockphoto.com/id/1326920136/photo/shot-of-a-business-women-using-laptop-working-at-home-stock-photo.jpg?s=612x612&w=0&k=20&c=tDhOPNMfBUlZLy5titrUrOXfHVbhVosEoQveTwuuL1Y=",
     available: true
   },
   {
@@ -47,7 +47,7 @@ const lawyers: Lawyer[] = [
     rating: 4.7,
     reviews: 156,
     hourlyRate: 180,
-    image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80",
+    image: "https://img.freepik.com/premium-photo/portrait-young-indian-female-lawyer-smiling-happy-her-workplace-office-indian-lawyer-technologist-professional-face-female-lawyer-legal-consultant-law-firm_785351-3584.jpg",
     available: true
   }
 ];
@@ -157,6 +157,7 @@ const LawyersPage = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Lawyers List */}
+          <div className='profile-hover'>
           <div className={`lg:col-span-${showBooking ? '2' : '3'} space-y-6`}>
             {filteredLawyers.map((lawyer) => (
               <div key={lawyer.id} className="bg-white rounded-xl shadow-lg p-6 flex flex-col md:flex-row gap-6">
@@ -211,6 +212,7 @@ const LawyersPage = () => {
                 </div>
               </div>
             ))}
+          </div>
           </div>
 
           {/* Booking Calendar */}

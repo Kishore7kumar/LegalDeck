@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useState } from "react";
+import { useParams } from "react-router-dom";
 import {
   Camera,
   MessageSquare,
@@ -10,15 +10,15 @@ import {
   Phone,
   CreditCard,
   DollarSign,
-  Shield
-} from 'lucide-react';
+  Shield,
+} from "lucide-react";
 import {
   LiveKitRoom,
   VideoConference,
   ControlBar,
-  useTracks
-} from '@livekit/components-react';
-import '@livekit/components-styles';
+  useTracks,
+} from "@livekit/components-react";
+import "@livekit/components-styles";
 
 interface Message {
   id: string;
@@ -28,22 +28,28 @@ interface Message {
 }
 
 const Consultation = () => {
+  const { roomName } = useParams();
+  const liveKitUrl = import.meta.env.VITE_LIVEKIT_URL;
+  const token = import.meta.env.VITE_LIVEKIT_TOKEN;
+
   const { lawyerId } = useParams();
   const [messages, setMessages] = useState<Message[]>([]);
-  const [newMessage, setNewMessage] = useState('');
+  const [newMessage, setNewMessage] = useState("");
   const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>('');
+  const [selectedPaymentMethod, setSelectedPaymentMethod] =
+    useState<string>("");
 
   // Mocked consultation details
   const consultation = {
     lawyer: {
-      name: 'Sarah Johnson',
-      expertise: 'Criminal Law',
+      name: "Sarah Johnson",
+      expertise: "Criminal Law",
       hourlyRate: 200,
-      image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80'
+      image:
+        "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80",
     },
     duration: 60, // minutes
-    totalAmount: 200
+    totalAmount: 200,
   };
 
   const handleSendMessage = (e: React.FormEvent) => {
@@ -52,20 +58,23 @@ const Consultation = () => {
 
     const message: Message = {
       id: Math.random().toString(),
-      sender: 'You',
+      sender: "You",
       content: newMessage,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     setMessages([...messages, message]);
-    setNewMessage('');
+    setNewMessage("");
   };
 
   const handlePayment = async () => {
     // In a real app, integrate with Stripe or other payment gateway
-    console.log('Processing payment with', selectedPaymentMethod);
+    console.log("Processing payment with", selectedPaymentMethod);
     setShowPaymentModal(false);
   };
+  if (!liveKitUrl || !token) {
+    return <p>Error: LiveKit URL or token is missing</p>;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -74,12 +83,7 @@ const Consultation = () => {
           {/* Video Conference */}
           <div className="lg:col-span-2">
             <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-              <LiveKitRoom
-                token="your-token"
-                serverUrl="your-livekit-url"
-                connect={true}
-                className="w-full aspect-video"
-              >
+              <LiveKitRoom serverUrl={liveKitUrl} token={token} connect={true}>
                 <VideoConference />
                 <ControlBar />
               </LiveKitRoom>
@@ -97,18 +101,26 @@ const Consultation = () => {
                   className="w-16 h-16 rounded-full object-cover"
                 />
                 <div>
-                  <h3 className="text-xl font-semibold">{consultation.lawyer.name}</h3>
-                  <p className="text-gray-600">{consultation.lawyer.expertise}</p>
+                  <h3 className="text-xl font-semibold">
+                    {consultation.lawyer.name}
+                  </h3>
+                  <p className="text-gray-600">
+                    {consultation.lawyer.expertise}
+                  </p>
                 </div>
               </div>
               <div className="space-y-3">
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Duration</span>
-                  <span className="font-medium">{consultation.duration} minutes</span>
+                  <span className="font-medium">
+                    {consultation.duration} minutes
+                  </span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Rate</span>
-                  <span className="font-medium">${consultation.lawyer.hourlyRate}/hour</span>
+                  <span className="font-medium">
+                    ${consultation.lawyer.hourlyRate}/hour
+                  </span>
                 </div>
                 <div className="flex justify-between text-sm font-semibold">
                   <span>Total Amount</span>
@@ -134,14 +146,14 @@ const Consultation = () => {
                   <div
                     key={message.id}
                     className={`flex ${
-                      message.sender === 'You' ? 'justify-end' : 'justify-start'
+                      message.sender === "You" ? "justify-end" : "justify-start"
                     }`}
                   >
                     <div
                       className={`max-w-[80%] rounded-lg p-3 ${
-                        message.sender === 'You'
-                          ? 'bg-indigo-600 text-white'
-                          : 'bg-gray-100'
+                        message.sender === "You"
+                          ? "bg-indigo-600 text-white"
+                          : "bg-gray-100"
                       }`}
                     >
                       <p className="text-sm">{message.content}</p>
@@ -189,7 +201,7 @@ const Consultation = () => {
                 <div>
                   <h4 className="font-medium mb-2">Select Payment Method</h4>
                   <div className="space-y-2">
-                    {['credit_card', 'upi', 'net_banking'].map((method) => (
+                    {["credit_card", "upi", "net_banking"].map((method) => (
                       <label
                         key={method}
                         className="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50"
@@ -199,11 +211,13 @@ const Consultation = () => {
                           name="payment_method"
                           value={method}
                           checked={selectedPaymentMethod === method}
-                          onChange={(e) => setSelectedPaymentMethod(e.target.value)}
+                          onChange={(e) =>
+                            setSelectedPaymentMethod(e.target.value)
+                          }
                           className="mr-3"
                         />
                         <span className="capitalize">
-                          {method.replace('_', ' ')}
+                          {method.replace("_", " ")}
                         </span>
                       </label>
                     ))}
