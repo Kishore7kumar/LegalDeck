@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { useParams } from "react-router-dom";
+import { LIVEKIT_URL, LIVEKIT_TOKEN } from "../config";
+
 import {
   Camera,
   MessageSquare,
@@ -29,8 +31,8 @@ interface Message {
 
 const Consultation = () => {
   const { roomName } = useParams();
-  const liveKitUrl = import.meta.env.VITE_LIVEKIT_URL;
-  const token = import.meta.env.VITE_LIVEKIT_TOKEN;
+  const liveKitUrl = LIVEKIT_URL;
+  const token = LIVEKIT_TOKEN;
 
   const { lawyerId } = useParams();
   const [messages, setMessages] = useState<Message[]>([]);
