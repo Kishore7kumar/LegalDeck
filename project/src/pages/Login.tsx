@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, ArrowRight } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+
 import { toast } from 'sonner';
+import axios from 'axios';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -17,16 +18,14 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const response = await axios.post('http://localhost:5000/api/auth/login', {
         email: formData.email,
         password: formData.password
       });
 
-      if (error) throw error;
-
       toast.success('Successfully logged in!');
       navigate('/');
-    } catch (error) {
+    } catch (error: any) {
       toast.error('Error logging in. Please try again.');
     } finally {
       setLoading(false);

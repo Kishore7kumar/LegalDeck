@@ -7,10 +7,13 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 
+
+
 import lawyerRoutes from './routes/lawyerRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import uploadRoutes from './routes/uploadRoutes.js';
 import videoRoutes from './routes/videoRoutes.js';
+import authRoutes from './routes/authRoutes.js';
 
 dotenv.config();
 
@@ -26,6 +29,8 @@ app.use(cors()); // Enable CORS
 app.use(helmet()); // Secure HTTP headers
 app.use(morgan('dev')); // Log HTTP requests
 
+
+
 // ✅ Static uploads path (for serving uploaded files)
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
@@ -34,6 +39,7 @@ app.use('/api/lawyers', lawyerRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/video', videoRoutes);
+app.use('/api/auth', authRoutes);
 
 // ✅ Test Route
 app.get('/', (req, res) => {

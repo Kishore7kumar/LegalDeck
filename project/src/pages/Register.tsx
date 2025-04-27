@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, User, ArrowRight } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+// import { supabase } from '../lib/supabase';
 import { toast } from 'sonner';
+import axios from 'axios';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -14,7 +15,7 @@ const Register = () => {
     confirmPassword: ''
   });
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (formData.password !== formData.confirmPassword) {
       toast.error('Passwords do not match');
@@ -24,7 +25,8 @@ const Register = () => {
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.signUp({
+       const response = await axios.post('http://localhost:5000/api/auth/register', {
+        name:  formData.name,
         email: formData.email,
         password: formData.password,
         options: {
@@ -33,8 +35,6 @@ const Register = () => {
           }
         }
       });
-
-      if (error) throw error;
 
       toast.success('Registration successful! Please check your email to verify your account.');
       navigate('/login');
