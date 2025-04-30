@@ -1,159 +1,209 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, User, ArrowRight } from 'lucide-react';
-// import { supabase } from '../lib/supabase';
-import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { toast } from 'sonner';
 
 const Register = () => {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({
+  const [userType, setUserType] = useState('');
+  const [clientForm, setClientForm] = useState({
     name: '',
     email: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+  });
+  const [lawyerForm, setLawyerForm] = useState({
+    name: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+    specialization: '',
+    experience: '',
+    fees: '',
+    documents: [],
   });
 
-  const handleSubmit = async (e) => {
+  const handleClientSubmit = async (e) => {
     e.preventDefault();
-    if (formData.password !== formData.confirmPassword) {
+    if (clientForm.password !== clientForm.confirmPassword) {
+      toast.error('Passwords do not match');
+      return;
+    }
+    try {
+      await axios.post('/api/auth/register', {
+        ...clientForm,
+        isLawyer: false,
+      });
+      toast.success('Client registered successfully');
+      navigate('/login');
+    } catch (err) {
+      toast.error('Registration failed');
+    }
+  };
+
+  const handleLawyerSubmit = async (e) => {
+    e.preventDefault();
+    if (lawyerForm.password !== lawyerForm.confirmPassword) {
       toast.error('Passwords do not match');
       return;
     }
 
-    setLoading(true);
+    const token = localStorage.getItem('token'); // ✅ Retrieve JWT token from localStorage
+
+    if (!token) {
+      toast.error('You must be logged in to register as a lawyer.');
+      return;
+    }
 
     try {
-       const response = await axios.post('http://localhost:5000/api/auth/register', {
-        name:  formData.name,
-        email: formData.email,
-        password: formData.password,
-        options: {
-          data: {
-            name: formData.name
-          }
+      const formData = new FormData();
+      Object.entries(lawyerForm).forEach(([key, value]) => {
+        if (key === 'documents') {
+          value.forEach((file) => formData.append('documents', file));
+        } else {
+          formData.append(key, value);
         }
       });
 
-      toast.success('Registration successful! Please check your email to verify your account.');
+      formData.append('isLawyer', true);
+
+      await axios.post('http://localhost:5000/api/auth/register-lawyer', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${token}`, // ✅ Attach token here
+        },
+      });
+
+      toast.success('Lawyer registered successfully');
       navigate('/login');
-    } catch (error) {
-      toast.error('Error during registration. Please try again.');
-    } finally {
-      setLoading(false);
+    } catch (err) {
+      toast.error('Registration failed');
     }
   };
 
+  if (!userType) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen">
+        <h2 className="text-xl mb-4">Register as:</h2>
+        <button
+          className="mb-2 px-4 py-2 bg-indigo-600 text-white rounded"
+          onClick={() => setUserType('client')}
+        >
+          Client
+        </button>
+        <button
+          className="px-4 py-2 bg-green-600 text-white rounded"
+          onClick={() => setUserType('lawyer')}
+        >
+          Lawyer
+        </button>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          Create your account
-        </h2>
-        <p className="mt-2 text-center text-sm text-gray-600">
-          Already have an account?{' '}
-          <Link to="/login" className="font-medium text-indigo-600 hover:text-indigo-500">
-            Sign in
-          </Link>
-        </p>
-      </div>
+    <div className="max-w-md mx-auto mt-10">
+      <h2 className="text-2xl font-bold mb-4">
+        {userType === 'client' ? 'Client Registration' : 'Lawyer Registration'}
+      </h2>
+      <form onSubmit={userType === 'client' ? handleClientSubmit : handleLawyerSubmit} className="space-y-4">
+        <input
+          type="text"
+          placeholder="Full Name"
+          required
+          className="w-full p-2 border rounded"
+          value={userType === 'client' ? clientForm.name : lawyerForm.name}
+          onChange={(e) =>
+            userType === 'client'
+              ? setClientForm({ ...clientForm, name: e.target.value })
+              : setLawyerForm({ ...lawyerForm, name: e.target.value })
+          }
+        />
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-          <form className="space-y-6" onSubmit={handleSubmit}>
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                Full Name
-              </label>
-              <div className="mt-1 relative">
-                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input
-                  id="name"
-                  name="name"
-                  type="text"
-                  required
-                  className="appearance-none block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                />
-              </div>
-            </div>
+        <input
+          type="email"
+          placeholder="Email"
+          required
+          className="w-full p-2 border rounded"
+          value={userType === 'client' ? clientForm.email : lawyerForm.email}
+          onChange={(e) =>
+            userType === 'client'
+              ? setClientForm({ ...clientForm, email: e.target.value })
+              : setLawyerForm({ ...lawyerForm, email: e.target.value })
+          }
+        />
 
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Email address
-              </label>
-              <div className="mt-1 relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  className="appearance-none block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                />
-              </div>
-            </div>
+        <input
+          type="password"
+          placeholder="Password"
+          required
+          className="w-full p-2 border rounded"
+          value={userType === 'client' ? clientForm.password : lawyerForm.password}
+          onChange={(e) =>
+            userType === 'client'
+              ? setClientForm({ ...clientForm, password: e.target.value })
+              : setLawyerForm({ ...lawyerForm, password: e.target.value })
+          }
+        />
 
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Password
-              </label>
-              <div className="mt-1 relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  required
-                  className="appearance-none block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                />
-              </div>
-            </div>
+        <input
+          type="password"
+          placeholder="Confirm Password"
+          required
+          className="w-full p-2 border rounded"
+          value={userType === 'client' ? clientForm.confirmPassword : lawyerForm.confirmPassword}
+          onChange={(e) =>
+            userType === 'client'
+              ? setClientForm({ ...clientForm, confirmPassword: e.target.value })
+              : setLawyerForm({ ...lawyerForm, confirmPassword: e.target.value })
+          }
+        />
 
-            <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
-                Confirm Password
-              </label>
-              <div className="mt-1 relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type="password"
-                  required
-                  className="appearance-none block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                  value={formData.confirmPassword}
-                  onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                />
-              </div>
-            </div>
+        {userType === 'lawyer' && (
+          <>
+            <input
+              type="text"
+              placeholder="Specialization"
+              required
+              className="w-full p-2 border rounded"
+              value={lawyerForm.specialization}
+              onChange={(e) => setLawyerForm({ ...lawyerForm, specialization: e.target.value })}
+            />
 
-            <div>
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full flex justify-center items-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                {loading ? (
-                  <div className="loading-spinner" />
-                ) : (
-                  <>
-                    Create Account
-                    <ArrowRight className="ml-2 w-4 h-4" />
-                  </>
-                )}
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
+            <input
+              type="number"
+              placeholder="Experience (years)"
+              required
+              className="w-full p-2 border rounded"
+              value={lawyerForm.experience}
+              onChange={(e) => setLawyerForm({ ...lawyerForm, experience: e.target.value })}
+            />
+
+            <input
+              type="number"
+              placeholder="Fees (in USD)"
+              required
+              className="w-full p-2 border rounded"
+              value={lawyerForm.fees}
+              onChange={(e) => setLawyerForm({ ...lawyerForm, fees: e.target.value })}
+            />
+
+            <input
+              type="file"
+              multiple
+              required
+              className="w-full p-2"
+              onChange={(e) =>
+                setLawyerForm({ ...lawyerForm, documents: Array.from(e.target.files) })
+              }
+            />
+          </>
+        )}
+
+        <button type="submit" className="w-full py-2 bg-indigo-600 text-white rounded">
+          Register
+        </button>
+      </form>
     </div>
   );
 };
