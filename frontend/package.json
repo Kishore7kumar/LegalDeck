@@ -9,5 +9,9 @@
   },
   "dependencies": {
     "livekit-server-sdk": "^2.10.2"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.4.1",
+    "vite": "^6.3.4"
   }
 }
